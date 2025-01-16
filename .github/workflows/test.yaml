@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  hello-world:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Say hello world
+        shell: bash
+        run: echo "Welcome to the Github Actions workshop!"
+
+  unit-test:
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run unit-tests
+        run: |
+          make tests_run > test_output.txt || echo "Tests failed"
+        continue-on-error: true
+
+      - name: Run coverage
+        run: |
+          make coverage > coverage_output.txt || echo "Coverage failed"
+        continue-on-error: true
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage_outputs
+          path: |
+            test_output.txt
+            coverage_output.txt
