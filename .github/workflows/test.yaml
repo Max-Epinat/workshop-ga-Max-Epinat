@@ -5,13 +5,16 @@ on:
     branches:
       - dev
       - main
+  pull_request:
+    branches:
+      - dev
+      - main
 
 jobs:
   hello-world:
     runs-on: ubuntu-20.04
     steps:
       - name: Say hello world
-        shell: bash
         run: echo "Welcome to the Github Actions workshop!"
 
   unit-test:
@@ -40,3 +43,23 @@ jobs:
           path: |
             test_output.txt
             coverage_output.txt
+
+  functional-test:
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run functional tests
+        run: |
+          make functional-tests > functional_tests_output.txt || echo "Functional tests failed"
+        continue-on-error: true
+
+      - name: Upload functional test artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: functional-tests_outputs
+          path: functional_tests_output.txt
